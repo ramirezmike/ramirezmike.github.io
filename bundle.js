@@ -43349,7 +43349,7 @@ require("./js/test")();
 
 console.log("app loaded");
 
-},{"./js/test":16}],3:[function(require,module,exports){
+},{"./js/test":21}],3:[function(require,module,exports){
 var inputManager = require("../input/inputManager");
 
 function ConfigManager() {
@@ -43377,7 +43377,82 @@ ConfigManager.prototype.save = function () {
 };
 
 module.exports = ConfigManager;
-},{"../input/inputManager":10}],4:[function(require,module,exports){
+},{"../input/inputManager":14}],4:[function(require,module,exports){
+var three = require("three"),
+    movementFactory = require("../../movement/movementFactory");
+
+function WanderAI(entity, settings) {
+    this._movementManager = movementFactory("moveTowardTarget", this);
+    this._entity = entity;
+    this._target = new three.Vector3(0, 0, 0);
+    this._newTargetDelay = 0;
+}
+
+WanderAI.prototype.getMesh = function () {
+    return this._entity.getMesh();
+};
+
+WanderAI.prototype.getMovementSpeed = function () {
+    return this._entity.speed;
+};
+
+WanderAI.prototype.getRotationSpeed = function () {
+    return this._entity.rotationSpeed;
+};
+
+WanderAI.prototype.getTarget = function () {
+    return this._target;
+};
+
+WanderAI.prototype.findTarget = function (delta) {
+    this._newTargetDelay -= delta;
+
+    if (this._newTargetDelay < 0) {
+        this._newTargetDelay = Math.random() * 3;
+        var randomX = random(-100, 100);
+        var randomZ = random(-100, 100);
+        this._target = new three.Vector3(randomX, 0, randomZ);
+    }
+};
+
+function random(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+WanderAI.prototype.update = function (delta) {
+    this._movementManager.update(delta);
+    this.findTarget(delta);
+};
+
+module.exports = WanderAI;
+
+},{"../../movement/movementFactory":19,"three":1}],5:[function(require,module,exports){
+var playerDriver = require("./human/player"),
+    wanderDriver = require("./ai/wanderAI");
+
+var driverTypes = {
+    "player": playerDriver,
+    "wander": wanderDriver
+};
+
+module.exports = function (driverType, entity, settings) {
+    return new (driverTypes[driverType] || playerDriver)(entity, settings);
+};
+
+},{"./ai/wanderAI":4,"./human/player":6}],6:[function(require,module,exports){
+var movementFactory = require("../../movement/movementFactory");
+
+function PlayerDriver(entity, settings) {
+    this._movementManager = movementFactory(settings.movementType, entity);
+
+}
+
+PlayerDriver.prototype.update = function (delta) {
+    this._movementManager.update(delta);
+};
+
+module.exports = PlayerDriver;
+},{"../../movement/movementFactory":19}],7:[function(require,module,exports){
 var objectManager = require("./objects/objectManager");
 
 function EntityManager(sceneWrapper) {
@@ -43405,9 +43480,9 @@ EntityManager.prototype.getPlayer = function () {
 
 module.exports = EntityManager;
 
-},{"./objects/objectManager":7}],5:[function(require,module,exports){
+},{"./objects/objectManager":11}],8:[function(require,module,exports){
 var three = require("three"),
-    movementFactory = require("../../movement/movementFactory");
+    driverFactory = require("../../drivers/driverFactory");
 
 function Cube(settings) {
     Object.assign(this, settings);
@@ -43417,7 +43492,7 @@ function Cube(settings) {
     this._mesh = new three.Mesh(geometry, material);
     this.speed = 60.5;
     this.rotationSpeed = 5.0;
-    this._movementManager = movementFactory(settings.movementType, this);
+    this._driver = driverFactory(settings.driverType, this, settings);
 }
 
 Cube.prototype.getMesh = function () {
@@ -43425,11 +43500,11 @@ Cube.prototype.getMesh = function () {
 };
 
 Cube.prototype.update = function (delta) {
-    this._movementManager.update(delta);
+    this._driver.update(delta);
 };
 
 module.exports = Cube;
-},{"../../movement/movementFactory":14,"three":1}],6:[function(require,module,exports){
+},{"../../drivers/driverFactory":5,"three":1}],9:[function(require,module,exports){
 var three = require("three");
 
 function Grid() {
@@ -43448,9 +43523,35 @@ Grid.prototype.getMesh = function () {
 
 module.exports = Grid;
 
-},{"three":1}],7:[function(require,module,exports){
+},{"three":1}],10:[function(require,module,exports){
+var three = require("three"),
+    driverFactory = require("../../drivers/driverFactory");
+
+function Icosahedron(settings) {
+    Object.assign(this, settings);
+
+    var geometry = new three.IcosahedronGeometry(10, 0);
+    var material = new three.MeshNormalMaterial();
+    this._mesh = new three.Mesh(geometry, material);
+    this.speed = 0.5;
+    this.rotationSpeed = 5.0;
+    this._driver = driverFactory(settings.driverType, this, settings);
+}
+
+Icosahedron.prototype.getMesh = function () {
+    return this._mesh;
+};
+
+Icosahedron.prototype.update = function (delta) {
+    this._driver.update(delta);
+};
+
+module.exports = Icosahedron;
+
+},{"../../drivers/driverFactory":5,"three":1}],11:[function(require,module,exports){
 var cube = require("./cube"),
     grid = require("./grid"),
+    icosahedron = require("./icosahedron"),
     jsUtil = require("../../utilities/jsUtilities");
 
 
@@ -43458,7 +43559,7 @@ function ObjectManager() {
     this.objects = [];
 }
 
-ObjectManager._types = { cube, grid };
+ObjectManager._types = { cube, grid, icosahedron };
 ObjectManager.types = jsUtil.arrayToObject(Object.keys(ObjectManager._types));
 
 ObjectManager.prototype.create = function (type, settings) {
@@ -43480,7 +43581,7 @@ ObjectManager.prototype.update = function (delta) {
 };
 
 module.exports = ObjectManager;
-},{"../../utilities/jsUtilities":18,"./cube":5,"./grid":6}],8:[function(require,module,exports){
+},{"../../utilities/jsUtilities":23,"./cube":8,"./grid":9,"./icosahedron":10}],12:[function(require,module,exports){
 var defaultController = require("./defaultControl");
 
 var controllerTypes = {
@@ -43490,7 +43591,7 @@ var controllerTypes = {
 module.exports = function (controllerType, entity) {
     return new (controllerTypes[controllerType] || defaultController)(entity);
 };
-},{"./defaultControl":9}],9:[function(require,module,exports){
+},{"./defaultControl":13}],13:[function(require,module,exports){
 var inputManager = require("./../inputManager"),
     _upRadian = (3 * Math.PI) / 4,
     _downRadian = (7 * Math.PI) / 4,
@@ -43526,7 +43627,7 @@ function DefaultControl(entity) {
 }
 
 module.exports = DefaultControl;
-},{"./../inputManager":10}],10:[function(require,module,exports){
+},{"./../inputManager":14}],14:[function(require,module,exports){
 var keyManager = require("./keyManager");
 
 function InputManager() {
@@ -43535,7 +43636,7 @@ function InputManager() {
 }
 
 InputManager.prototype.inputs = {
-    Up: "UP",
+    Up: "Up",
     Down: "Down",
     Left: "Left",
     Right: "Right"
@@ -43562,7 +43663,7 @@ InputManager.prototype.update = function (delta) {
 
 module.exports = new InputManager();
 
-},{"./keyManager":11}],11:[function(require,module,exports){
+},{"./keyManager":15}],15:[function(require,module,exports){
 var domUtilities = require("../utilities/domUtilities");
 
 function KeyManager(keyMap) {
@@ -43616,7 +43717,7 @@ function init(keyManager) {
 
 module.exports = KeyManager;
 
-},{"../utilities/domUtilities":17}],12:[function(require,module,exports){
+},{"../utilities/domUtilities":22}],16:[function(require,module,exports){
 var clockWrapper = require("./wrappers/clockWrapper"),
     renderWrapper = require("./wrappers/renderWrapper"),
     cameraWrapper = require("./wrappers/cameraWrapper"),
@@ -43639,46 +43740,76 @@ function GameLoop() {
 
 GameLoop.prototype.start = function () {
     this._running = true;
-    this._entityManager.load({
-        objects: [
-            {
-                type: "cube",
-                settings: {
-                    isPlayerControlled: true,
-                    controllerType: "default",
-                    movementType: "defaultController"
-                }
-            },
-            { type: "grid" }
-        ]
-    });
+    var items = {
+        objects: [{
+            type: "cube",
+            settings: {
+                isPlayerControlled: true,
+                controllerType: "default",
+                driverType: "player",
+                movementType: "defaultController"
+            }
+        }, {
+            type: "grid"
+        }]
+    };
+
+    for (var i = 0; i < 100; i++) {
+        items.objects.push({
+            type: "icosahedron",
+            settings: {
+                driverType: "wander"
+            }
+        });
+
+    }
+
+    this._entityManager.load(items);
+
 
     inputManager.setControlMap(this._configManager.controlMap);
 
     update.call(this);
+
+    var self = this;
+    window.addEventListener("blur", function () {
+       self.pause();
+    });
+
+    window.addEventListener("focus", function () {
+        self.resume();
+    });
 };
 
 GameLoop.prototype.pause = function () {
     this._running = false;
 };
 
+GameLoop.prototype.resume = function () {
+    this._running = true;
+    this._clock.getDelta();
+    update.call(this);
+};
+
 function update() {
+    if (!this._running) {
+        return;
+    }
+
     var delta = this._clock.getDelta();
     this._statisticsManager.update(delta);
     inputManager.update(delta);
     this._entityManager.update(delta)
     this._renderer.render(this._scene, this._camera);
 
-    if (this._running) {
-        requestAnimationFrame(update.bind(this));
-    }
+    requestAnimationFrame(update.bind(this));
 }
 
 GameLoop.default = GameLoop;
 
 module.exports = GameLoop;
 
-},{"./config/configManager":3,"./entities/entityManager":4,"./input/inputManager":10,"./statistics/statisticsManager":15,"./wrappers/cameraWrapper":19,"./wrappers/clockWrapper":20,"./wrappers/renderWrapper":21,"./wrappers/sceneWrapper":22}],13:[function(require,module,exports){
+},{"./config/configManager":3,"./entities/entityManager":7,"./input/inputManager":14,"./statistics/statisticsManager":20,"./wrappers/cameraWrapper":24,"./wrappers/clockWrapper":25,"./wrappers/renderWrapper":26,"./wrappers/sceneWrapper":27}],17:[function(require,module,exports){
 var controllerFactory = require("../input/controllers/controllerFactory"),
     inputManager = require("../input/inputManager"),
     three = require("three");
@@ -43728,18 +43859,46 @@ DefaultControllerMovementManager.prototype.update = function(delta) {
 
 module.exports = DefaultControllerMovementManager;
 
-},{"../input/controllers/controllerFactory":8,"../input/inputManager":10,"three":1}],14:[function(require,module,exports){
-var defaultControllerMovementManager = require("./defaultControllerMovementManager");
+},{"../input/controllers/controllerFactory":12,"../input/inputManager":14,"three":1}],18:[function(require,module,exports){
+var three = require("three");
+
+function MoveTowardTargetManager(entity) {
+    this._entity = entity;
+    this._rotationQuaternion = new three.Quaternion();
+    this._rotationAxis = new three.Vector3(0, 1, 0);
+}
+
+MoveTowardTargetManager.prototype.update = function(delta) {
+    if (!this._entity.getTarget) { return; }
+
+    var distance = this._entity.getMesh().position.distanceTo(this._entity.getTarget());
+    if (distance != 0) {
+        this._entity.getMesh().position.lerp(this._entity.getTarget(), delta * this._entity.getMovementSpeed());
+    }
+
+    var angleToTarget = this._entity.getMesh().position.angleTo(this._entity.getTarget());
+    if (angleToTarget) {
+        this._rotationQuaternion.setFromAxisAngle(this._rotationAxis, angleToTarget);
+        this._entity.getMesh().quaternion.slerp(this._rotationQuaternion, this._entity.getRotationSpeed() * delta);
+    }
+};
+
+module.exports = MoveTowardTargetManager;
+
+},{"three":1}],19:[function(require,module,exports){
+var defaultControllerMovementManager = require("./defaultControllerMovementManager"),
+    moveTowardTargetManager = require("./moveTowardTargetManager");
 
 var movementTypes = {
-    "defaultController": defaultControllerMovementManager
+    "defaultController": defaultControllerMovementManager,
+    "moveTowardTarget": moveTowardTargetManager
 };
 
 module.exports = function (movementType, entity) {
     return new (movementTypes[movementType] || defaultControllerMovementManager)(entity);
 };
 
-},{"./defaultControllerMovementManager":13}],15:[function(require,module,exports){
+},{"./defaultControllerMovementManager":17,"./moveTowardTargetManager":18}],20:[function(require,module,exports){
 function StatisticsManager(config) {
     this._enabled = config.enabled;
     if (this._enabled) {
@@ -43756,7 +43915,7 @@ StatisticsManager.prototype.update = function (delta) {
 };
 
 module.exports = StatisticsManager;
-},{}],16:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var domUtilities = require("./utilities/domUtilities"),
     gameLoop = require("./loop");
 
@@ -43766,7 +43925,7 @@ module.exports = function () {
         loop.start();
     });
 };
-},{"./loop":12,"./utilities/domUtilities":17}],17:[function(require,module,exports){
+},{"./loop":16,"./utilities/domUtilities":22}],22:[function(require,module,exports){
 var domUtilities = {};
 
 domUtilities.ready = function () {
@@ -43794,7 +43953,7 @@ domUtilities.off = function (selector, eventName, eventHandler) {
 };
 
 module.exports = domUtilities;
-},{}],18:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var jsUtilities = {};
 
 jsUtilities.arrayToObject = function (array) {
@@ -43805,7 +43964,7 @@ jsUtilities.arrayToObject = function (array) {
 };
 
 module.exports = jsUtilities;
-},{}],19:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var three = require("three");
 
 function IsometricCamera() {
@@ -43825,7 +43984,7 @@ function IsometricCamera() {
 module.exports = {
     isometric: IsometricCamera
 };
-},{"three":1}],20:[function(require,module,exports){
+},{"three":1}],25:[function(require,module,exports){
 var three = require("three");
 
 function ClockWrapper() {
@@ -43838,7 +43997,7 @@ ClockWrapper.prototype.getDelta = function () {
 
 ClockWrapper.default = ClockWrapper;
 module.exports = ClockWrapper;
-},{"three":1}],21:[function(require,module,exports){
+},{"three":1}],26:[function(require,module,exports){
 var three = require("three");
 
 
@@ -43865,7 +44024,7 @@ module.exports = {
    default: RenderWrapper
 };
 
-},{"three":1}],22:[function(require,module,exports){
+},{"three":1}],27:[function(require,module,exports){
 var three = require("three");
 
 function SceneWrapper() {

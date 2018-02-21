@@ -6,3 +6,43 @@ body {
 canvas {
     overflow: hidden;
 }
+
+.editorBase {
+    background-color: #aaaaaa;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    padding: 3em;
+}
+
+.node {
+    height: 19px;
+    width: 20px;
+    border: 1px solid black;
+    background-color: #ccc;
+    display: inline-block;
+}
+
+.node.nodeActive {
+    background-color: #fcc;
+}
+
+.node:hover {
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.nodeRow {
+    margin-bottom: -4px;
+}
+
+.gridBase {
+    max-width: 70%;
+    max-height: 70%;
+    margin: auto;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    white-space: nowrap;
+    overflow-x:auto;
+    overflow-y:auto;
+}

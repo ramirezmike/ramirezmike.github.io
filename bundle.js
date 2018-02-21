@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -43349,7 +43349,7 @@ require("./js/test")();
 
 console.log("app loaded");
 
-},{"./js/test":21}],3:[function(require,module,exports){
+},{"./js/test":26}],3:[function(require,module,exports){
 var inputManager = require("../input/inputManager");
 
 function ConfigManager() {
@@ -43377,7 +43377,7 @@ ConfigManager.prototype.save = function () {
 };
 
 module.exports = ConfigManager;
-},{"../input/inputManager":14}],4:[function(require,module,exports){
+},{"../input/inputManager":19}],4:[function(require,module,exports){
 var three = require("three"),
     movementFactory = require("../../movement/movementFactory");
 
@@ -43426,7 +43426,7 @@ WanderAI.prototype.update = function (delta) {
 
 module.exports = WanderAI;
 
-},{"../../movement/movementFactory":19,"three":1}],5:[function(require,module,exports){
+},{"../../movement/movementFactory":24,"three":1}],5:[function(require,module,exports){
 var playerDriver = require("./human/player"),
     wanderDriver = require("./ai/wanderAI");
 
@@ -43452,7 +43452,213 @@ PlayerDriver.prototype.update = function (delta) {
 };
 
 module.exports = PlayerDriver;
-},{"../../movement/movementFactory":19}],7:[function(require,module,exports){
+},{"../../movement/movementFactory":24}],7:[function(require,module,exports){
+var domUtilities = require("../utilities/domUtilities"),
+    levelLoader = require("./levelLoader"),
+    grid = require("./grid"),
+    _identifiers = {
+        editorLauncher: "#editorLauncher",
+        printOutputButton: "#printOutput"
+    },
+    _classes = {
+        editorBase: "editorBase"
+    };
+
+function Editor() {
+    this.editorButton = document.createElement("Button");
+    this.editorButton.setAttribute("id", _identifiers.editorLauncher.substring(1));
+    this.editorLabel = document.createTextNode("");
+    this.editorBaseView = undefined;
+    this.grid = undefined;
+
+    this.printOutputButton = domUtilities.createButton(_identifiers.printOutputButton, "Print", this.printOutput.bind(this));
+
+    this.boundCloseEditorView = this.closeEditorView.bind(this);
+    this.boundLaunchEditorView = this.launchEditorView.bind(this);
+
+    document.body.insertBefore(this.editorButton, document.body.firstChild);
+}
+
+Editor.prototype.initialize = function (onUpdate) {
+    this.editorBaseView = document.createElement("Div");
+    this.editorBaseView.className = _classes.editorBase;
+    this.editorLabel = document.createTextNode("Launch Editor");
+    this.editorButton.appendChild(this.editorLabel);
+    this.onUpdate = onUpdate;
+
+    domUtilities.off(_identifiers.editorLauncher, "click", this.boundCloseEditorView);
+    domUtilities.on(_identifiers.editorLauncher, "click", this.boundLaunchEditorView);
+
+    this.grid = new grid(this.editorBaseView);
+    this.grid.initialize();
+};
+
+Editor.prototype.launchEditorView = function () {
+    document.body.insertBefore(this.editorBaseView, document.body.lastChild);
+    document.body.insertBefore(this.printOutputButton, document.body.lastChild);
+
+    this.editorButton.removeChild(this.editorLabel);
+    this.editorLabel = document.createTextNode("Close Editor");
+    this.editorButton.appendChild(this.editorLabel);
+
+    domUtilities.off(_identifiers.editorLauncher, "click", this.boundLaunchEditorView);
+    domUtilities.on(_identifiers.editorLauncher, "click", this.boundCloseEditorView);
+};
+
+Editor.prototype.closeEditorView = function () {
+    document.body.removeChild(this.editorBaseView);
+    document.body.removeChild(this.printOutputButton);
+    this.editorButton.removeChild(this.editorLabel);
+    levelLoader.updateCurrentLevel(this.grid.grid);
+    this.initialize(this.onUpdate);
+    this.onUpdate();
+};
+
+Editor.prototype.printOutput = function () {
+    this.grid.print();
+};
+
+module.exports = Editor;
+
+},{"../utilities/domUtilities":27,"./grid":8,"./levelLoader":9}],8:[function(require,module,exports){
+var domUtilities = require("../utilities/domUtilities"),
+    _identifiers = {
+    },
+    _classes = {
+        gridBaseView: "gridBase",
+        nodeRow: "nodeRow",
+        node: "node",
+        nodeActive: "nodeActive"
+    },
+    levelLoader = require("./levelLoader"),
+    _modes = {
+        ground: "ground"
+    };
+
+function Grid(parent) {
+    this.xUnits = 20;
+    this.yUnits = 20;
+    this.parent = parent;
+
+    this.gridBaseView = document.createElement("Div");
+    this.gridBaseView.className = _classes.gridBaseView;
+    this._modeSelector = document.createElement("select");
+    this._coordinateSpan = document.createElement("span");
+
+    this.parent.appendChild(this._modeSelector);
+    this.parent.appendChild(this._coordinateSpan);
+
+    this.mode = _modes.ground;
+    this.grid = levelLoader.getCurrentLevel() || [];
+
+    this._createModeSelector();
+}
+
+Grid.prototype._createModeSelector = function () {
+    for (var mode in _modes) {
+        var option = new Option();
+        option.value = mode;
+        option.text = mode;
+
+        this._modeSelector.options.add(option);
+    }
+};
+
+Grid.prototype.initialize = function () {
+    for (var i = 0; i < this.yUnits; i++) {
+        var nodeRow = document.createElement("Div");
+        nodeRow.className = _classes.nodeRow;
+
+        this.grid[i] = this.grid[i] || [];
+
+        for (var j = 0; j < this.xUnits; j++) {
+            var node = document.createElement("Div");
+            node.className = (this.grid[i][j] || {})[_modes.ground] ? _classes.node + " " + _classes.nodeActive : _classes.node;
+            domUtilities.on(node, "click", this._triggerCurrentModeNodeClick.bind(this));
+            domUtilities.on(node, "mouseover", this._updateCoordinates.bind(this));
+            nodeRow.appendChild(node);
+
+            this.grid[i][j] = this.grid[i][j] || {};
+            this.grid[i][j][_modes.ground] = this.grid[i][j][_modes.ground] || 0;
+
+        }
+
+        this.gridBaseView.appendChild(nodeRow);
+    }
+
+    this.parent.appendChild(this.gridBaseView);
+};
+
+Grid.prototype._updateCoordinates = function (event) {
+    var coordinates = getRawCoordinates(event.target);
+    if (this._coordinateSpan.firstChild) {
+        this._coordinateSpan.removeChild(this._coordinateSpan.firstChild);
+    }
+
+    coordinates.x = coordinates.x - (this.xUnits / 2);
+    coordinates.y = coordinates.y - (this.yUnits / 2);
+
+    var coordinateText = document.createTextNode("X: " + coordinates.x + " Y: " + coordinates.y);
+    this._coordinateSpan.appendChild(coordinateText);
+};
+
+Grid.prototype._triggerCurrentModeNodeClick = function (event) {
+    var coordinates = getRawCoordinates(event.target);
+    var indicies = convertRawCoordinatesToIndicies(coordinates.x, coordinates.y, this.xUnits, this.yUnits);
+
+    var x = indicies.x + (this.xUnits / 2);
+    var y = indicies.y + (this.yUnits / 2)
+    this.grid[y][x][this.mode] = this.grid[y][x][this.mode] ? 0 : 1;
+
+    event.target.className = this.grid[y][x][this.mode] ? _classes.node + " " + _classes.nodeActive : _classes.node;
+};
+
+Grid.prototype._updateGrid = function () {
+};
+
+Grid.prototype.print = function () {
+    console.log(JSON.stringify(this.grid));
+};
+
+function getRawCoordinates(element) {
+    var parentRow = element.parentNode;
+    return {
+        x: Array.prototype.indexOf.call(parentRow.childNodes, element),
+        y: Array.prototype.indexOf.call(parentRow.parentNode.childNodes, parentRow)
+    };
+}
+
+function convertRawCoordinatesToIndicies(rawX, rawY, xUnits, yUnits) {
+    return {
+        x: rawX - (xUnits / 2),
+        y: rawY - (yUnits / 2)
+    };
+}
+
+module.exports = Grid;
+
+},{"../utilities/domUtilities":27,"./levelLoader":9}],9:[function(require,module,exports){
+var levelOne = require("./levels/one");
+
+function LevelLoader() {
+
+}
+
+LevelLoader.prototype.getCurrentLevel = function () {
+    return levelOne;
+};
+
+LevelLoader.prototype.updateCurrentLevel = function (level) {
+    levelOne = level;
+};
+
+
+module.exports = new LevelLoader();
+
+},{"./levels/one":10}],10:[function(require,module,exports){
+module.exports =[[{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1},{"ground":1},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":1},{"ground":1},{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1},{"ground":0},{"ground":1},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1},{"ground":0},{"ground":1},{"ground":0},{"ground":1}],[{"ground":1},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":0},{"ground":1}],[{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1},{"ground":1}]] ;
+
+},{}],11:[function(require,module,exports){
 var objectManager = require("./objects/objectManager");
 
 function EntityManager(sceneWrapper) {
@@ -43462,6 +43668,10 @@ function EntityManager(sceneWrapper) {
 
 EntityManager.prototype.update = function (delta) {
     this._objectManager.update(delta);
+};
+
+EntityManager.prototype.clear = function () {
+    this._sceneWrapper.clear();
 };
 
 EntityManager.prototype.load = function (entities) {
@@ -43480,7 +43690,7 @@ EntityManager.prototype.getPlayer = function () {
 
 module.exports = EntityManager;
 
-},{"./objects/objectManager":11}],8:[function(require,module,exports){
+},{"./objects/objectManager":15}],12:[function(require,module,exports){
 var three = require("three"),
     driverFactory = require("../../drivers/driverFactory");
 
@@ -43504,17 +43714,21 @@ Cube.prototype.update = function (delta) {
 };
 
 module.exports = Cube;
-},{"../../drivers/driverFactory":5,"three":1}],9:[function(require,module,exports){
+},{"../../drivers/driverFactory":5,"three":1}],13:[function(require,module,exports){
 var three = require("three");
 
 function Grid() {
-    var geometry = new three.PlaneBufferGeometry( 100, 100, 10, 10 );
+    var geometry = new three.PlaneBufferGeometry(200, 200, 20, 20);
     var material = new three.MeshBasicMaterial({ wireframe: true, opacity: 0.5, transparent: true });
     this._mesh = new three.Mesh(geometry, material);
 
     this._mesh.rotation.order = 'YXZ';
     this._mesh.rotation.y = - Math.PI / 2;
     this._mesh.rotation.x = - Math.PI / 2;
+
+    this._mesh.position.y = -5;
+    this._mesh.position.x = 0;
+    this._mesh.position.z = 0;
 }
 
 Grid.prototype.getMesh = function () {
@@ -43523,7 +43737,7 @@ Grid.prototype.getMesh = function () {
 
 module.exports = Grid;
 
-},{"three":1}],10:[function(require,module,exports){
+},{"three":1}],14:[function(require,module,exports){
 var three = require("three"),
     driverFactory = require("../../drivers/driverFactory");
 
@@ -43548,10 +43762,11 @@ Icosahedron.prototype.update = function (delta) {
 
 module.exports = Icosahedron;
 
-},{"../../drivers/driverFactory":5,"three":1}],11:[function(require,module,exports){
+},{"../../drivers/driverFactory":5,"three":1}],15:[function(require,module,exports){
 var cube = require("./cube"),
     grid = require("./grid"),
     icosahedron = require("./icosahedron"),
+    wall = require("./wall"), // TODO this should be moved to something that handles static items
     jsUtil = require("../../utilities/jsUtilities");
 
 
@@ -43559,7 +43774,7 @@ function ObjectManager() {
     this.objects = [];
 }
 
-ObjectManager._types = { cube, grid, icosahedron };
+ObjectManager._types = { cube, grid, icosahedron, wall };
 ObjectManager.types = jsUtil.arrayToObject(Object.keys(ObjectManager._types));
 
 ObjectManager.prototype.create = function (type, settings) {
@@ -43581,7 +43796,39 @@ ObjectManager.prototype.update = function (delta) {
 };
 
 module.exports = ObjectManager;
-},{"../../utilities/jsUtilities":23,"./cube":8,"./grid":9,"./icosahedron":10}],12:[function(require,module,exports){
+},{"../../utilities/jsUtilities":28,"./cube":12,"./grid":13,"./icosahedron":14,"./wall":16}],16:[function(require,module,exports){
+var three = require("three");
+
+function Wall(settings) {
+    settings.width = settings.width || 0;
+    settings.height = settings.height || 0;
+    settings.depth = settings.depth || 0;
+    settings.positionX = settings.positionX || 0;
+    settings.positionY = settings.positionY || 0;
+    settings.positionZ = settings.positionZ || 0;
+    settings.color = settings.color || 0x00ff00;
+
+    var geometry = new three.BoxGeometry(settings.width, settings.height, settings.depth);
+    var material = new three.MeshLambertMaterial({ color: settings.color });
+    material.transparent = settings.transparent || false;
+    material.opacity = settings.opacity || 1;
+    this._mesh = new three.Mesh(geometry, material);
+
+    this._mesh.position.x = settings.positionX;
+    this._mesh.position.y = settings.positionY + (settings.height / 4);
+    this._mesh.position.z = settings.positionZ;
+}
+
+Wall.prototype.getMesh = function () {
+    return this._mesh;
+};
+
+Wall.prototype.update = function (delta) {
+};
+
+module.exports = Wall;
+
+},{"three":1}],17:[function(require,module,exports){
 var defaultController = require("./defaultControl");
 
 var controllerTypes = {
@@ -43591,7 +43838,7 @@ var controllerTypes = {
 module.exports = function (controllerType, entity) {
     return new (controllerTypes[controllerType] || defaultController)(entity);
 };
-},{"./defaultControl":13}],13:[function(require,module,exports){
+},{"./defaultControl":18}],18:[function(require,module,exports){
 var inputManager = require("./../inputManager"),
     _upRadian = (3 * Math.PI) / 4,
     _downRadian = (7 * Math.PI) / 4,
@@ -43627,7 +43874,7 @@ function DefaultControl(entity) {
 }
 
 module.exports = DefaultControl;
-},{"./../inputManager":14}],14:[function(require,module,exports){
+},{"./../inputManager":19}],19:[function(require,module,exports){
 var keyManager = require("./keyManager");
 
 function InputManager() {
@@ -43663,7 +43910,7 @@ InputManager.prototype.update = function (delta) {
 
 module.exports = new InputManager();
 
-},{"./keyManager":15}],15:[function(require,module,exports){
+},{"./keyManager":20}],20:[function(require,module,exports){
 var domUtilities = require("../utilities/domUtilities");
 
 function KeyManager(keyMap) {
@@ -43717,13 +43964,14 @@ function init(keyManager) {
 
 module.exports = KeyManager;
 
-},{"../utilities/domUtilities":22}],16:[function(require,module,exports){
+},{"../utilities/domUtilities":27}],21:[function(require,module,exports){
 var clockWrapper = require("./wrappers/clockWrapper"),
     renderWrapper = require("./wrappers/renderWrapper"),
     cameraWrapper = require("./wrappers/cameraWrapper"),
     sceneWrapper = require("./wrappers/sceneWrapper"),
     configManager = require("./config/configManager"),
     inputManager = require("./input/inputManager"),
+    levelLoader = require("./editor/levelLoader"),
     statisticsManager = require("./statistics/statisticsManager"),
     entityManager = require("./entities/entityManager");
 
@@ -43753,19 +44001,10 @@ GameLoop.prototype.start = function () {
             type: "grid"
         }]
     };
+    items.objects = items.objects.concat(this.generateWalls());
 
-    for (var i = 0; i < 100; i++) {
-        items.objects.push({
-            type: "icosahedron",
-            settings: {
-                driverType: "wander"
-            }
-        });
-
-    }
-
+    this._entityManager.clear();
     this._entityManager.load(items);
-
 
     inputManager.setControlMap(this._configManager.controlMap);
 
@@ -43779,6 +44018,34 @@ GameLoop.prototype.start = function () {
     window.addEventListener("focus", function () {
         self.resume();
     });
+};
+
+GameLoop.prototype.generateWalls = function () {
+    var level = levelLoader.getCurrentLevel();
+    var generatedWalls = [];
+    var size = level.length;
+
+    for (var y = 0; y < size; y++) {
+        for (var x = 0; x < size; x++) {
+            if (level[y][x].ground) {
+                generatedWalls.push({
+                    type: "wall",
+                    settings: {
+                        color: 0x0000aa,
+                        width: 10,
+                        transparent: false,
+                        opacity: 0.5,
+                        depth: 10,
+                        height: 20,
+                        positionX: (x - (size / 2.1)) * 10,
+                        positionZ: (y - (size / 2.1)) * 10
+                    }
+                })
+            }
+        }
+    }
+
+    return generatedWalls;
 };
 
 GameLoop.prototype.pause = function () {
@@ -43809,9 +44076,10 @@ GameLoop.default = GameLoop;
 
 module.exports = GameLoop;
 
-},{"./config/configManager":3,"./entities/entityManager":7,"./input/inputManager":14,"./statistics/statisticsManager":20,"./wrappers/cameraWrapper":24,"./wrappers/clockWrapper":25,"./wrappers/renderWrapper":26,"./wrappers/sceneWrapper":27}],17:[function(require,module,exports){
+},{"./config/configManager":3,"./editor/levelLoader":9,"./entities/entityManager":11,"./input/inputManager":19,"./statistics/statisticsManager":25,"./wrappers/cameraWrapper":29,"./wrappers/clockWrapper":30,"./wrappers/renderWrapper":31,"./wrappers/sceneWrapper":32}],22:[function(require,module,exports){
 var controllerFactory = require("../input/controllers/controllerFactory"),
     inputManager = require("../input/inputManager"),
+    levelLoader = require("../editor/levelLoader"),
     three = require("three");
 
 function DefaultControllerMovementManager(entity) {
@@ -43839,7 +44107,34 @@ DefaultControllerMovementManager.prototype.setVerticalAngle = function (angleInR
 
 DefaultControllerMovementManager.prototype.update = function(delta) {
     if (this._isMoving) {
+        var currentLevel = levelLoader.getCurrentLevel();
         this._entity.getMesh().translateZ(delta * this._entity.speed);
+
+        // convert to level coordinates
+        var indexesToCheck = [];
+        indexesToCheck.push({
+            x: Math.floor(((this._entity.getMesh().position.x - 5.0) / 10) + 10),
+            y: Math.floor(((this._entity.getMesh().position.z - 5.0) / 10) + 10)
+        });
+
+        indexesToCheck.push({
+            x: Math.floor(((this._entity.getMesh().position.x + 5.0) / 10) + 10),
+            y: Math.floor(((this._entity.getMesh().position.z + 5.0) / 10) + 10)
+        });
+
+        indexesToCheck.push({
+            x: Math.floor(((this._entity.getMesh().position.x) / 10) + 10),
+            y: Math.floor(((this._entity.getMesh().position.z) / 10) + 10)
+        });
+
+        var isObjectInWall = indexesToCheck.some(function (object) {
+            return ((currentLevel[object.y] || [])[object.x] || {}).ground;
+        });
+
+        if (isObjectInWall) {
+            this._entity.getMesh().translateZ(-delta * this._entity.speed);
+        }
+
         this._isMoving = false;
     }
 
@@ -43859,7 +44154,7 @@ DefaultControllerMovementManager.prototype.update = function(delta) {
 
 module.exports = DefaultControllerMovementManager;
 
-},{"../input/controllers/controllerFactory":12,"../input/inputManager":14,"three":1}],18:[function(require,module,exports){
+},{"../editor/levelLoader":9,"../input/controllers/controllerFactory":17,"../input/inputManager":19,"three":1}],23:[function(require,module,exports){
 var three = require("three");
 
 function MoveTowardTargetManager(entity) {
@@ -43885,7 +44180,7 @@ MoveTowardTargetManager.prototype.update = function(delta) {
 
 module.exports = MoveTowardTargetManager;
 
-},{"three":1}],19:[function(require,module,exports){
+},{"three":1}],24:[function(require,module,exports){
 var defaultControllerMovementManager = require("./defaultControllerMovementManager"),
     moveTowardTargetManager = require("./moveTowardTargetManager");
 
@@ -43898,7 +44193,7 @@ module.exports = function (movementType, entity) {
     return new (movementTypes[movementType] || defaultControllerMovementManager)(entity);
 };
 
-},{"./defaultControllerMovementManager":17,"./moveTowardTargetManager":18}],20:[function(require,module,exports){
+},{"./defaultControllerMovementManager":22,"./moveTowardTargetManager":23}],25:[function(require,module,exports){
 function StatisticsManager(config) {
     this._enabled = config.enabled;
     if (this._enabled) {
@@ -43915,17 +44210,22 @@ StatisticsManager.prototype.update = function (delta) {
 };
 
 module.exports = StatisticsManager;
-},{}],21:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var domUtilities = require("./utilities/domUtilities"),
+    editor = require("./editor/editor"),
     gameLoop = require("./loop");
 
 module.exports = function () {
     domUtilities.ready().then(function () {
         var loop = new gameLoop();
+        var editObject = new editor();
+
         loop.start();
+        editObject.initialize(loop.start.bind(loop));
     });
 };
-},{"./loop":16,"./utilities/domUtilities":22}],22:[function(require,module,exports){
+
+},{"./editor/editor":7,"./loop":21,"./utilities/domUtilities":27}],27:[function(require,module,exports){
 var domUtilities = {};
 
 domUtilities.ready = function () {
@@ -43939,21 +44239,51 @@ domUtilities.ready = function () {
 };
 
 domUtilities.on = function (selector, eventName, eventHandler) {
-    var element = document.querySelectorAll(selector)[0];
+    var element = typeof selector != "object" ? document.querySelectorAll(selector)[0] : selector;
     if (element) {
         element.addEventListener(eventName, eventHandler);
     }
 };
 
 domUtilities.off = function (selector, eventName, eventHandler) {
-    var element = document.querySelectorAll(selector)[0];
+    var element = typeof selector != "object" ? document.querySelectorAll(selector)[0] : selector;
     if (element) {
         element.removeEventListener(eventName, eventHandler);
     }
 };
 
+domUtilities.load = function (address) {
+    return new Promise(function (resolve, reject) {
+        var request = new XMLHttpRequest();
+        request.open('GET', address, true);
+        request.onreadystatechange = function() {
+            if (this.readyState !== 4 || this.status !== 200) {
+                reject();
+            }
+
+            resolve(this.responseText);
+        };
+
+        request.send();
+    });
+};
+
+domUtilities.createButton = function (identifier, label, onclick) {
+    var button = document.createElement("Button");
+    var label = document.createTextNode(label);
+
+    button.setAttribute("id", identifier);
+    button.appendChild(label);
+
+    this.off(button, "click", onclick);
+    this.on(button, "click", onclick);
+
+    return button;
+};
+
 module.exports = domUtilities;
-},{}],23:[function(require,module,exports){
+
+},{}],28:[function(require,module,exports){
 var jsUtilities = {};
 
 jsUtilities.arrayToObject = function (array) {
@@ -43964,7 +44294,7 @@ jsUtilities.arrayToObject = function (array) {
 };
 
 module.exports = jsUtilities;
-},{}],24:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 var three = require("three");
 
 function IsometricCamera() {
@@ -43984,7 +44314,7 @@ function IsometricCamera() {
 module.exports = {
     isometric: IsometricCamera
 };
-},{"three":1}],25:[function(require,module,exports){
+},{"three":1}],30:[function(require,module,exports){
 var three = require("three");
 
 function ClockWrapper() {
@@ -43997,7 +44327,7 @@ ClockWrapper.prototype.getDelta = function () {
 
 ClockWrapper.default = ClockWrapper;
 module.exports = ClockWrapper;
-},{"three":1}],26:[function(require,module,exports){
+},{"three":1}],31:[function(require,module,exports){
 var three = require("three");
 
 
@@ -44024,20 +44354,44 @@ module.exports = {
    default: RenderWrapper
 };
 
-},{"three":1}],27:[function(require,module,exports){
+},{"three":1}],32:[function(require,module,exports){
 var three = require("three");
 
 function SceneWrapper() {
     this._scene = new three.Scene();
-    this._scene.add(new three.AmbientLight(0x444444));
-    this._scene.add(new three.AxisHelper(40));
+    this.initialize();
 }
 
 SceneWrapper.prototype.add = function (entity) {
     this._scene.add(entity);
 };
 
+SceneWrapper.prototype.clear = function () {
+    while (this._scene.children.length) {
+        this._scene.remove(this._scene.children[0]);
+    }
+
+    this.initialize();
+};
+
+
+SceneWrapper.prototype.initialize = function () {
+    this._scene.add(new three.AmbientLight(0x444444));
+    this._scene.add(new three.AxisHelper(40));
+
+    var directionalLight = new three.SpotLight(0xffffff, 2);
+    directionalLight.position.set(0, 120, 120);
+    directionalLight.castShadow = true;
+    directionalLight.shadowMapWidth = 1024;
+    directionalLight.shadowMapHeight = 1024;
+    directionalLight.shadowCameraNear = 500;
+    directionalLight.shadowCameraFar = 4000;
+    directionalLight.shadowCameraFov = 30;
+    this._scene.add(directionalLight);
+};
+
 module.exports = {
     default: SceneWrapper
 };
+
 },{"three":1}]},{},[2]);

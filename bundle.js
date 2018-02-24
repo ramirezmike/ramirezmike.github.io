@@ -43701,8 +43701,25 @@ function Cube(settings) {
     var material = new three.MeshNormalMaterial();
     this._mesh = new three.Mesh(geometry, material);
     this.speed = 60.5;
+    this.dashCoolDown = 1;
+    this.dashSpeed = 3;
     this.rotationSpeed = 5.0;
     this._driver = driverFactory(settings.driverType, this, settings);
+
+    this._cubeEditorDiv = document.createElement("div");
+    document.body.prepend(this._cubeEditorDiv);
+    this._cubeEditorDiv.innerHTML = `
+        <div>
+            <label for='speed'>Speed:</label>
+            <input type='text' id='speed' style='width:30px;' value='60.5'/>
+            <label for='speed'>RotationSpeed:</label>
+            <input type='text' id='rotationSpeed' style='width:30px;' value='5.0'/>
+            <label for='speed'>DashSpeed:</label>
+            <input type='text' id='dashSpeed' style='width:30px;' value='3'/>
+            <label for='speed'>DashCoolDown:</label>
+            <input type='text' id='dashCoolDown' style='width:30px;' value='1'/>
+        </div>
+    `;
 }
 
 Cube.prototype.getMesh = function () {
@@ -43710,10 +43727,19 @@ Cube.prototype.getMesh = function () {
 };
 
 Cube.prototype.update = function (delta) {
+    this.updateEntityFromUserInputs();
     this._driver.update(delta);
 };
 
+Cube.prototype.updateEntityFromUserInputs = function () {
+    this.speed = Number(document.getElementById("speed").value);
+    this.rotationSpeed = Number(document.getElementById("rotationSpeed").value);
+    this.dashSpeed = Number(document.getElementById("dashSpeed").value);
+    this.dashCoolDown = Number(document.getElementById("dashCoolDown").value);
+};
+
 module.exports = Cube;
+
 },{"../../drivers/driverFactory":5,"three":1}],13:[function(require,module,exports){
 var three = require("three");
 
@@ -44086,9 +44112,6 @@ var controllerFactory = require("../input/controllers/controllerFactory"),
     levelLoader = require("../editor/levelLoader"),
     three = require("three");
 
-var _dashCoolDown = 1;
-var _dashSpeed = 3;
-
 function DefaultControllerMovementManager(entity) {
     this._entity = entity;
     this._isMoving = false;
@@ -44098,12 +44121,12 @@ function DefaultControllerMovementManager(entity) {
     this._rotationAxis = new three.Vector3(0, 1, 0);
     this._controller = controllerFactory(entity.controllerType, this);
     this._currentDash = 1;
-    this._currentDashCoolDown = _dashCoolDown;
+    this._currentDashCoolDown = entity.dashCoolDown;
     inputManager.setEntity(this);
 }
 
 DefaultControllerMovementManager.prototype.setCurrentSpeed = function (isMoving) {
-    this._isMoving = isMoving; // TODO: convert to float representing speed
+    this._isMoving = isMoving;
 };
 
 DefaultControllerMovementManager.prototype.setHorizontalAngle = function (angleInRadians) {
@@ -44119,8 +44142,8 @@ DefaultControllerMovementManager.prototype.dash = function () {
         return;
     }
 
-    this._currentDashCoolDown = _dashCoolDown;
-    this._currentDash = _dashSpeed;
+    this._currentDashCoolDown = this._entity.dashCoolDown;
+    this._currentDash = this._entity.dashSpeed;
 };
 
 DefaultControllerMovementManager.prototype.update = function(delta) {
@@ -44221,7 +44244,6 @@ function StatisticsManager() {
     this._enabled = configManager.statistics.enabled;
     if (this._enabled) {
         this._statisticsDiv = document.createElement("div");
-        this._statisticsDiv.innerHTML = 'test';
         document.body.appendChild(this._statisticsDiv);
     }
 }
@@ -44406,11 +44428,11 @@ SceneWrapper.prototype.initialize = function () {
     var directionalLight = new three.SpotLight(0xffffff, 2);
     directionalLight.position.set(0, 120, 120);
     directionalLight.castShadow = true;
-    directionalLight.shadowMapWidth = 1024;
-    directionalLight.shadowMapHeight = 1024;
-    directionalLight.shadowCameraNear = 500;
-    directionalLight.shadowCameraFar = 4000;
-    directionalLight.shadowCameraFov = 30;
+    directionalLight.shadow.mapSize.width = 1024;
+    directionalLight.shadow.mapSize.Height = 1024;
+    directionalLight.shadow.camera.near = 500;
+    directionalLight.shadow.camera.far = 4000;
+    directionalLight.shadow.camera.fov = 30;
     this._scene.add(directionalLight);
 };
 

@@ -43350,21 +43350,20 @@ require("./js/test")();
 console.log("app loaded");
 
 },{"./js/test":26}],3:[function(require,module,exports){
-var inputManager = require("../input/inputManager");
-
 function ConfigManager() {
 
     // Default
     this.controlMap = {};
     this.controlMap.keyMap = {
-        "87": [inputManager.inputs.Up],
-        "83": [inputManager.inputs.Down],
-        "65": [inputManager.inputs.Left],
-        "68": [inputManager.inputs.Right]
+        "87": ["Up"],
+        "83": ["Down"],
+        "65": ["Left"],
+        "68": ["Right"],
+        "32": ["Dash"]
     };
 
     this.statistics = {
-        enabled: false
+        enabled: true
     };
 }
 
@@ -43376,8 +43375,9 @@ ConfigManager.prototype.save = function () {
     // Add code to save to cookies or a file
 };
 
-module.exports = ConfigManager;
-},{"../input/inputManager":19}],4:[function(require,module,exports){
+module.exports = new ConfigManager();
+
+},{}],4:[function(require,module,exports){
 var three = require("three"),
     movementFactory = require("../../movement/movementFactory");
 
@@ -43444,7 +43444,6 @@ var movementFactory = require("../../movement/movementFactory");
 
 function PlayerDriver(entity, settings) {
     this._movementManager = movementFactory(settings.movementType, entity);
-
 }
 
 PlayerDriver.prototype.update = function (delta) {
@@ -43452,6 +43451,7 @@ PlayerDriver.prototype.update = function (delta) {
 };
 
 module.exports = PlayerDriver;
+
 },{"../../movement/movementFactory":24}],7:[function(require,module,exports){
 var domUtilities = require("../utilities/domUtilities"),
     levelLoader = require("./levelLoader"),
@@ -43846,7 +43846,7 @@ var inputManager = require("./../inputManager"),
     _rightRadian = Math.PI / 4;
 
 function DefaultControl(entity) {
-    if (!entity.setCurrentSpeed || !entity.setHorizontalAngle || !entity.setVerticalAngle) {
+    if (!entity.setCurrentSpeed || !entity.setHorizontalAngle || !entity.setVerticalAngle || !entity.dash) {
         console.error("Entity missing one of functions: setCurrentSpeed, setHorizontalAngle or setVerticalAngle");
     }
 
@@ -43871,22 +43871,32 @@ function DefaultControl(entity) {
         entity.setCurrentSpeed(true);
         entity.setHorizontalAngle(_rightRadian);
     };
+
+    entity.inputCommands[inputManager.inputs.Dash] = function (delta) {
+        entity.dash();
+    };
 }
 
 module.exports = DefaultControl;
+
 },{"./../inputManager":19}],19:[function(require,module,exports){
-var keyManager = require("./keyManager");
+var keyManager = require("./keyManager"),
+    configManager = require("../config/configManager");
+    
 
 function InputManager() {
     this._keyManager = new keyManager();
     this._entity = undefined;
+
+    this.setControlMap(configManager.controlMap);
 }
 
 InputManager.prototype.inputs = {
     Up: "Up",
     Down: "Down",
     Left: "Left",
-    Right: "Right"
+    Right: "Right",
+    Dash: "Dash"
 };
 
 InputManager.prototype.setEntity = function (entity) {
@@ -43910,7 +43920,7 @@ InputManager.prototype.update = function (delta) {
 
 module.exports = new InputManager();
 
-},{"./keyManager":20}],20:[function(require,module,exports){
+},{"../config/configManager":3,"./keyManager":20}],20:[function(require,module,exports){
 var domUtilities = require("../utilities/domUtilities");
 
 function KeyManager(keyMap) {
@@ -43965,23 +43975,20 @@ function init(keyManager) {
 module.exports = KeyManager;
 
 },{"../utilities/domUtilities":27}],21:[function(require,module,exports){
-var clockWrapper = require("./wrappers/clockWrapper"),
+var _clock = require("./wrappers/clockWrapper"),
     renderWrapper = require("./wrappers/renderWrapper"),
     cameraWrapper = require("./wrappers/cameraWrapper"),
     sceneWrapper = require("./wrappers/sceneWrapper"),
-    configManager = require("./config/configManager"),
     inputManager = require("./input/inputManager"),
     levelLoader = require("./editor/levelLoader"),
     statisticsManager = require("./statistics/statisticsManager"),
     entityManager = require("./entities/entityManager");
 
 function GameLoop() {
-    this._configManager = new configManager();
-    this._statisticsManager = new statisticsManager(this._configManager.statistics);
+    this._statisticsManager = new statisticsManager();
     this._renderer = new renderWrapper.default(window.innerWidth, window.innerHeight);
     this._scene = new sceneWrapper.default();
     this._camera = new cameraWrapper.isometric();
-    this._clock = new clockWrapper.default();
     this._entityManager = new entityManager(this._scene);
     this._running = false;
 }
@@ -44005,8 +44012,6 @@ GameLoop.prototype.start = function () {
 
     this._entityManager.clear();
     this._entityManager.load(items);
-
-    inputManager.setControlMap(this._configManager.controlMap);
 
     update.call(this);
 
@@ -44054,7 +44059,6 @@ GameLoop.prototype.pause = function () {
 
 GameLoop.prototype.resume = function () {
     this._running = true;
-    this._clock.getDelta();
     update.call(this);
 };
 
@@ -44063,7 +44067,7 @@ function update() {
         return;
     }
 
-    var delta = this._clock.getDelta();
+    var delta = _clock.getDelta();
     this._statisticsManager.update(delta);
     inputManager.update(delta);
     this._entityManager.update(delta)
@@ -44076,11 +44080,14 @@ GameLoop.default = GameLoop;
 
 module.exports = GameLoop;
 
-},{"./config/configManager":3,"./editor/levelLoader":9,"./entities/entityManager":11,"./input/inputManager":19,"./statistics/statisticsManager":25,"./wrappers/cameraWrapper":29,"./wrappers/clockWrapper":30,"./wrappers/renderWrapper":31,"./wrappers/sceneWrapper":32}],22:[function(require,module,exports){
+},{"./editor/levelLoader":9,"./entities/entityManager":11,"./input/inputManager":19,"./statistics/statisticsManager":25,"./wrappers/cameraWrapper":29,"./wrappers/clockWrapper":30,"./wrappers/renderWrapper":31,"./wrappers/sceneWrapper":32}],22:[function(require,module,exports){
 var controllerFactory = require("../input/controllers/controllerFactory"),
     inputManager = require("../input/inputManager"),
     levelLoader = require("../editor/levelLoader"),
     three = require("three");
+
+var _dashCoolDown = 1;
+var _dashSpeed = 3;
 
 function DefaultControllerMovementManager(entity) {
     this._entity = entity;
@@ -44090,6 +44097,8 @@ function DefaultControllerMovementManager(entity) {
     this._rotationQuaternion = new three.Quaternion();
     this._rotationAxis = new three.Vector3(0, 1, 0);
     this._controller = controllerFactory(entity.controllerType, this);
+    this._currentDash = 1;
+    this._currentDashCoolDown = _dashCoolDown;
     inputManager.setEntity(this);
 }
 
@@ -44105,10 +44114,22 @@ DefaultControllerMovementManager.prototype.setVerticalAngle = function (angleInR
     this._verticalAngle = angleInRadians;
 };
 
+DefaultControllerMovementManager.prototype.dash = function () {
+    if (this._currentDashCoolDown > 0) {
+        return;
+    }
+
+    this._currentDashCoolDown = _dashCoolDown;
+    this._currentDash = _dashSpeed;
+};
+
 DefaultControllerMovementManager.prototype.update = function(delta) {
+    this._currentDash = this._currentDash <= 1 ? 1 : this._currentDash - delta;
+    this._currentDashCoolDown = Math.max(0, this._currentDashCoolDown - delta);
+
     if (this._isMoving) {
         var currentLevel = levelLoader.getCurrentLevel();
-        this._entity.getMesh().translateZ(delta * this._entity.speed);
+        this._entity.getMesh().translateZ(delta * this._entity.speed * this._currentDash);
 
         // convert to level coordinates
         var indexesToCheck = [];
@@ -44132,7 +44153,7 @@ DefaultControllerMovementManager.prototype.update = function(delta) {
         });
 
         if (isObjectInWall) {
-            this._entity.getMesh().translateZ(-delta * this._entity.speed);
+            this._entity.getMesh().translateZ(-delta * this._entity.speed * this._currentDash);
         }
 
         this._isMoving = false;
@@ -44194,8 +44215,10 @@ module.exports = function (movementType, entity) {
 };
 
 },{"./defaultControllerMovementManager":22,"./moveTowardTargetManager":23}],25:[function(require,module,exports){
-function StatisticsManager(config) {
-    this._enabled = config.enabled;
+var configManager = require("../config/configManager");
+
+function StatisticsManager() {
+    this._enabled = configManager.statistics.enabled;
     if (this._enabled) {
         this._statisticsDiv = document.createElement("div");
         this._statisticsDiv.innerHTML = 'test';
@@ -44210,7 +44233,8 @@ StatisticsManager.prototype.update = function (delta) {
 };
 
 module.exports = StatisticsManager;
-},{}],26:[function(require,module,exports){
+
+},{"../config/configManager":3}],26:[function(require,module,exports){
 var domUtilities = require("./utilities/domUtilities"),
     editor = require("./editor/editor"),
     gameLoop = require("./loop");
@@ -44325,8 +44349,8 @@ ClockWrapper.prototype.getDelta = function () {
     return this._clock.getDelta();
 };
 
-ClockWrapper.default = ClockWrapper;
-module.exports = ClockWrapper;
+module.exports = new ClockWrapper();
+
 },{"three":1}],31:[function(require,module,exports){
 var three = require("three");
 

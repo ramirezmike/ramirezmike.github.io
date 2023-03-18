@@ -1,5 +1,11 @@
+body {
+    background-color: #222;
+    color: #eee;
+}
+
 .game {
     margin: 5em;
+    min-height: 31em;
 }
 
 .game img {
@@ -10,4 +16,7 @@
 
 .game_text {
 
+}
+
+.controls {
 }

@@ -3,6 +3,10 @@ body {
     color: #eee;
 }
 
+h2 {
+    text-align: center;
+}
+
 .game {
     margin: 5em;
     min-height: 31em;

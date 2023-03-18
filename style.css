@@ -1,104 +1,13 @@
-body {
-    padding: 2em;
+.game {
+    margin: 5em;
 }
 
-.compositionContainer {
-    display: flex;
-    flex-direction: column;
-    height: 90%;
-    background-color: #ababab;
-    overflow-y: auto;
+.game img {
+    float: left;
+    height: 31em;
+    margin-right: 2em;
 }
 
-.trackContainer:first-child {
-    border-top: 1px solid darkgoldenrod;
-}
+.game_text {
 
-.settings {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.trackContainer {
-    min-height: 100px;
-    border-bottom: 1px solid darkgoldenrod;
-    border-left: 1px solid darkgoldenrod;
-    border-right: 1px solid darkgoldenrod;
-    display: flex;
-    flex-direction: row;
-}
-
-#addTrackButton {
-    padding-top: 45px;
-    cursor: pointer;
-}
-
-.trackDescriptionContainer {
-    z-index: 1;
-    background-color:#777;
-    border-right: 1px solid darkgrey;
-    width: 100px;
-}
-
-.measureContainer {
-    flex-grow: 1;
-    display: flex;
-    background-color: #ccc;
-}
-
-.measureIndicatorContainer {
-    position: absolute;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-}
-
-.positionIndicator {
-    cursor: pointer;
-    position: absolute;
-    left: 100px;
-    z-index: 2;
-    height: 100%;
-    border-left: red solid 2px;
-    width: 30px;
-}
-
-.measureIndicator {
-    width: 100px;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-}
-
-.measureIndicator:not(:first-child) {
-    border-left: 1px solid lightgreen;
-}
-
-.beatIndicator {
-    flex-grow: 1;
-    height: 100%;
-}
-
-.measureIndicator:not(:first-child) .beatIndicator:not(:last-child) {
-    border-right: 1px solid green;
-}
-
-.clip {
-    background-color: lightgreen;
-    width: 130px;
-    opacity: .5;
-    display: flex;
-    resize: horizontal;
-    overflow: auto;
-}
-
-.draggableClipHandle {
-    width: 100%;
-    cursor: pointer;
-}
-
-.bottomControls {
-    margin-top: .5em;
-    padding: .5em;
 }

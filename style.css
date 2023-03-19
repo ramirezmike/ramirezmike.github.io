@@ -1,3 +1,8 @@
+* {
+    --line-thickness: 0.01in;
+    --line-color: #eee;
+}
+
 body {
     background-color: #222;
     color: #eee;
@@ -22,5 +27,25 @@ h2 {
 
 }
 
-.controls {
+.controls_container {
+    background-color: #333;
+    padding: 1em;
+    width: 100%;
 }
+
+.video_container {
+    display: flex;
+    justify-content: center;
+}
+
+.video_container video {
+    width: 75%;
+}
+
+[hr], hr {
+    background: var(--line-color);
+    border: solid var(--line-thickness) transparent;
+    border-radius: var(--line-thickness);
+    margin: auto auto;
+}
+

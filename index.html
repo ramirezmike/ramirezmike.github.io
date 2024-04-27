@@ -1,130 +1,463 @@
-<html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="style.css" >
-    </head>
-    <body>
-        <h2>Games by Michael Ramirez</h2>
-        <div class="video_container">
-            <video autoplay loop muted>
-                <source src="videos/clip_01.mp4" type="video/mp4">
-            </video>
-        </div>
-        <p>Play my games for free on my <a href="https://ramirezmike2.itch.io/" target="_blank">itch.io</a> page</p>
-        <p>Follow me on mastodon: <a href="https://mastodon.social/@ramirezmike" target="_blank"> @ramirezmike@mastodon.social</a></p>
-        <div hr=""></div>
-        <div class="game">
-            <img src="images/not_snake_capsule.png" />
-            <div class="game_text">
-                <p>A snake game in 3D, but you're the food! This was my first game made with the Bevy Engine.</p>
-                <p>You play as a chipmunk-y thing whose goal is to collect enough orbs in each level to spawn the exit. While collecting, you'll have to avoid the snake which behaves like the classic snake game but also will chase you if you get too close to its mouth.</p>
-                <div class="controls_container">
-                    <div class="control">
-                        D-Pad - Move 
-                    </div>
-                    <div class="control">
-                        A - Action button
-                    </div>
-                </div>
+<!-- <!DOCTYPE html> -->
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <!-- Materialize - Compiled and minified CSS-->
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/css/materialize.min.css" />
+  <!-- Font Awesome Icon - CSS-->
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <!-- Custom Styles-->
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <title>Michael Ramirez | Game Developer</title>
+
+  <!-- Open Graph-->
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Michael Ramirez | Game Developer" />
+  <meta property="og:description" content="Game Developer" />
+  <meta property="og:url" content="https://ramirezmike.github.io/" />
+  <meta property="og:site_name" content="Michael Ramirez | Game Developer" />
+  <meta property="article:publisher" content="https://ramirezmike.github.io/" />
+  <meta name="author" content="Michael Ramirez" />
+  <meta name="description" content="Game Developer / Principal Software Engineer" />
+  <link rel="apple-touch-icon" sizes="57x57" href="/assets/img/favicon/apple-icon-57x57.png" />
+  <link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicon/apple-icon-60x60.png" />
+  <link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/apple-icon-72x72.png" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicon/apple-icon-76x76.png" />
+  <link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/apple-icon-114x114.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicon/apple-icon-120x120.png" />
+  <link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicon/apple-icon-144x144.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicon/apple-icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicon/apple-icon-180x180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/img/favicon/android-icon-192x192.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon/favicon-96x96.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon/favicon-16x16.png" />
+  <link rel="manifest" href="/assets/img/favicon/manifest.json" />
+  <meta name="msapplication-TileColor" content="#ffffff" />
+  <meta name="msapplication-TileImage" content="/assets/img/favicon/ms-icon-144x144.png" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="robots" content="index, follow" />
+</head>
+
+<body>
+  <!-- Navigation Menu-->
+  <!-- Nav class 1 -->
+  <nav class="hide-on-small-only">
+    <ul class="side-nav fixed section table-of-contents">
+
+      <li class="logo">
+        <a id="logo-container" aria-label="Navigate to the beginning of the page" href="#intro"
+          class="brand-logo grey-blue-text">
+          <img src="/assets/img/michael_ramirez.jpeg" class="circle img-responsive profile-pic" alt="avatar">
+        </a>
+      </li>
+
+      <li class="bold">
+        <a aria-label="Navigate to the About section" href="#about" class="waves-effect waves-dark teal-text"><i
+            class="mdi-social-person small"></i><span>About</span></a>
+      </li>
+
+      <li class="bold">
+        <!-- mdi-av-web small
+             mdi-av-my-library-books small-->
+        <a aria-label="Navigate to the Games section" href="#games" class="waves-effect waves-dark teal-text"><i
+            class="mdi-av-my-library-books small"></i><span>My Games</span></a>
+      </li>
+
+      <li class="bold">
+        <!-- 
+        1. mdi-communication-contacts
+        2. mdi-content-mail
+        3. mdi-communication-email
+        -->
+        <a aria-label="Navigate to the Contact section" href="#contact" class="waves-effect waves-dark teal-text"><i
+            class="mdi-content-mail small"></i><span>Contact</span></a>
+      </li>
+
+    </ul>
+  </nav>
+
+  <!-- Nav class 2 -->
+  <nav class="hide-on-large only trigger z-depth-1">
+    <a aria-label="Toggle visibility of the mobile navbar" href="#" data-activates="slide-out"
+      class="button-collapse"><i class="mdi-navigation-menu"></i></a>
+    <div class="name-title">
+      <a id="name" aria-label="Navigate to the beginning of the page" href="#" class="teal-text">Michael Ramirez</a><span class="black-text">Game Developer</span>
+    </div>
+  </nav>
+
+  <!-- Nav class 3 -->
+  <nav class="hide-on-large only">
+    <ul id="slide-out" class="side-nav">
+      <li class="bold">
+        <a aria-label="Navigate to the About section" href="#about" class="waves-effect waves-dark teal-text"><i
+            class="mdi-social-person small"></i><span>About</span></a>
+      </li>
+      <li class="bold">
+        <a aria-label="Navigate to the Games section" href="#games" class="waves-effect waves-dark teal-text"><i
+            class="mdi-av-my-library-books small"></i><span>My Games</span></a>
+      </li>
+      <li class="bold">
+        <a aria-label="Navigate to the Contact section" href="#contact" class="waves-effect waves-dark teal-text"><i
+            class="mdi-content-mail small"></i><span>Contact</span></a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main Content-->
+  <main>
+    <!-- First Section: Heading lines and image -->
+    <section id="intro" class="section scrollspy full-height">
+      <div class="overlay"></div>
+      <div class="container">
+        <div class="col-md-9">
+          <div class="content section-padding valign" style="margin-left: 10%; margin-top: 50px;">
+            <div class="caption">
+              <h2>Hi, I'm <span class="teal">Michael Ramirez</span></h2>
+              <h5 style="color:#fff">A <span class="typing" style="font-weight: 300; color:#004d40"></span></h5>
+              <!-- <h5 style="color:#00796b">A <span class="typing" style="font-weight: 300; color:#fff"></span></h5> -->
+              <h5>I like to make games sometimes.</h5>
+              <h5>Follow me and check out my games below!</h5>
             </div>
-        </div>
-        <div hr=""></div>
-        <div class="game">
-            <img src="images/mechaburro_capsule.png" />
-            <div class="game_text">
-                <p>A singleplayer/local multiplayer game (up to 4 players) with bots (8 total burros) inspired by twin-stick shooters. I made this in 7 days as an entry to the first Bevy Engine game jam following the theme "Unfair Advantage." It was rated 2nd place out of 74 entries.</p>
+            <div class="social">
+              <a href="https://www.linkedin.com/in/michael-ramirez-b1a98649/" target="_blank">
+                <button class="icon-btn linkedin">
+                  <i class="fa-brands fa-linkedin"></i>
+                </button>
+              </a>
+              <a href="https://github.com/ramirezmike/" target="_blank">
+                <button class="icon-btn linkedin">
+                  <i class="fa-brands fa-github"></i>
+                </button>
+              </a>
+              <a href="https://www.tiktok.com/@mmmmramirez" target="_blank">
+                <button class="icon-btn linkedin">
+                    <i class="fa-brands fa-tiktok"></i>
+                </button>
+              </a>
+              <a href="https://mastodon.social/@ramirezmike" target="_blank">
+                <button class="icon-btn linkedin">
+                    <i class="fa-brands fa-mastodon"></i>
+                </button>
+              </a>
 
-                <div class="controls_container">
-                    <div class="control">
-                        D-Pad - Move your burro
-                    </div>
-                    <div class="control">
-                        Y - Shoot candy up
-                    </div>
-                    <div class="control">
-                        X - Shoot candy left
-                    </div>
-                    <div class="control">
-                        B - Shoot candy right
-                    </div>
-                    <div class="control">
-                        A - Shoot candy down
-                    </div>
-                </div>
-                
-                <p>Players choose to play as one of 8 different burro piñatas and then attempt to be the last burro standing in each level of the game. Burros can shoot candy in just the cardinal directions but are able to move independently from where they're aiming. When hit, burros will flash momentairly and be invulnurable to damage but will also be unable to shoot. Shot candies have a limited range before disappearing and burros have a cooldown period before being able to shoot again.</p>
-
-                <p>At the start of each round, one burro is chosen randomly to be upgraded to the Mechaburro. The Mechaburro shoots lasers which travel faster, have a much larger range and also experience a shorter cooldown between shots.</p>
-
-                <p>Rounds ends when only one burro remains or 5 seconds after all human players have lost. Points are based on order of elimination with the first eliminated getting 0 points and each burro after getting 1 more than the previously eliminiated burro. Points are accumulated across rounds and the burro with the most points at the end of the game is declared the winner.  </p>
-
-                <p>Currently working on an updated version which you can see in the video below</p>
-                <iframe width="1074" height="671" src="https://www.youtube.com/embed/jn69VP00NY4" title="¿Quién es el Mechaburro? 2023 Update - Full Playthrough" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
-        </div>
-        <div hr=""></div>
-        <div class="game">
-            <img src="images/football_capsule.png" />
-            <div class="game_text">
-                <p>I made this in 10 days as an entry to the second Bevy Engine game jam following the theme "Combine." It won 1st place out of 85 entries.</p>
-                <p>USAFLSCXLV is a singleplayer action game where you attempt to score as many touchdowns as you can while avoiding professional football players in an attempt to elevate your draft status as part of the "USA Football League" Scouting Combine.</p>
-
-                <div class="controls_container">
-                    <div class="control">
-                        D-Pad - Move
-                    </div>
-                    <div class="control">
-                        A - Advance text
-                    </div>
-                </div>
+            <div class='buttons'>
+              <a href="#about" class="readme">Read More</a>
+              <a href="#contact" class="contactme">Contact Me</a>
             </div>
+          </div>
         </div>
-        <div hr=""></div>
-        <div class="game">
-            <img src="images/adores_capsule.png" />
-            <div class="game_text">
-                <p>Adore's Antiques is a singleplayer 3D action game where you attempt to assist the owners of a small antique shop get ahead of their local competition.</p>
-                <p>This was my submission to the Github Game Off 2022 game jam. It ranked 149th place out of 554 entries. The theme of the jam was "cliché" with loads of examples to choose from. I made this game based on "Like a bull in a china shop" which I'm not sure is a cliche but it was on the list.</p>
-                <div class="controls_container">
-                    <div class="control">
-                        D-Pad - Move 
-                    </div>
-                    <div class="control">
-                        A - Action button
-                    </div>
-                </div>
+      </div>
+    </section>
+
+    <!-- Second Section: About -->
+    <section id="about" class="section scrollspy">
+      <h3 class="page-title white-text teal">About</h3>
+      <div class="container flow-text">
+        <p>
+          I am a Principal Software Engineer who enjoys making video games for fun. I mainly make games using Rust with the Bevy game engine.
+
+          My games are among the top popular games tagged with "Bevy" on <a href="https://itch.io/games/tag-bevy" target="_blank">itch.io</a> and I also won the first place spot of the 2nd Bevy Jam with my game USA Football League Scouting Combine XLV. 
+
+          In my free time I enjoy making music, traveling and spending time with my fiancée and our cat. 
+        </p>
+          
+        <!-- <p>
+          
+          Detail-oriented Software Developer with professional experience in Backend Development, Machine Learning, Computer Vision. I am adept in Python, Django, Flask, SQL, Machine Learning, Computer Vision.           
+        </p> -->
+        <p>
+          Feel free to contact me if you want to collaborate on a game or to tell me you thought my game was trash!
+        </p>
+        <!-- <p>
+          Another Paragraph
+        </p>  -->
+      </div>
+    </section>
+
+    <!-- Fourth Section: Games-->
+    <section id="games" class="section scrollspy">
+      <h3 class="page-title white-text teal">My Games</h3>
+      <div class="container">
+        <div class="row">
+
+          <div class="col s12 m6 l4">
+            <div class="card medium">
+              <div class="card-image waves-effect waves-block waves-light">
+                <video autoplay="" loop="" muted="" style="height: 100%; width: 100%" class="activator" >
+                    <source src="/assets/video/not_snake.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="card-content">
+                <span class="card-title activator teal-text hoverline">Not Snake</span>
+                <p>
+                  A "Snake" game where you aren't the snake
+                </p>
+              </div>
+              <div class="card-action">
+                <a aria-label="Play" href="https://ramirezmike2.itch.io/not-snake" target="_blank" data-position="top"
+                  data-tooltip="Play Here"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-external-link"></i></a>
+                <a aria-label="Visit the GitHub repo for project" href="https://github.com/ramirezmike/not_snake_game"
+                  target="_blank" data-position="top" data-tooltip="View Source"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-github"></i></a>
+              </div>
             </div>
+          </div>
 
-            <iframe width="1193" height="671" src="https://www.youtube.com/embed/ENJQ6VIvXLU" title="Adore&#39;s Antiques Trailer" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </div>
-        <div hr=""></div>
-        <div class="game">
-            <img src="images/walk_capsule.png" />
-            <div class="game_text">
-                <p>An isometric-view, single-player action game about walking your pet(s) through a neighborhood. I made this game using the Bevy Engine in 7 days as a submission for the 2nd Rusty game jam. The theme of the jam was an image of a half-dog-half-chicken interpreted however you'd like. It was rated 2nd place out of 17 entries. </p>
-
-                <div class="controls_container">
-                    <div class="control">
-                        D-Pad - Move
-                    </div>
-                    <div class="control">
-                        Y - Tap to yank yellow leash, hold to reel yellow leash in
-                    </div>
-                    <div class="control">
-                        X - Tap to yank blue leash, hold to reel blue leash in
-                    </div>
-                    <div class="control">
-                        B - Tap to yank red leash, hold to reel red leash in
-                    </div>
-                    <div class="control">
-                        A - Tap to yank green leash, hold to reel green leash in
-                    </div>
-                </div>
-
-                <p>The goal is to get the highest score before time runs out. Points can be added or deducted by various actions you or your pets do. Each additional pet you're walking multiplies the number of points you get per yellow orb.</p>
-
-                <p>There are three types of pets: Dogs, Chickens and ChickenDogs, which each have their own behaviors and interactions with the environment. Quick ProTip for Beginners: don't pick up too many pets too fast because it can get overwhelming!</p>
+          <div class="col s12 m6 l4">
+            <div class="card medium">
+              <div class="card-image waves-effect waves-block waves-light">
+                <video autoplay="" loop="" muted="" style="height: 100%; width: 100%" class="activator" >
+                    <source src="/assets/video/mechaburro.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="card-content">
+                <span class="card-title activator teal-text hoverline">¿Quién es el Mechaburro?</span>
+                <p>
+                  A local multiplayer inspired by twin-stick shooters
+                </p>
+              </div>
+              <div class="card-action">
+                <a aria-label="Play" href="https://ramirezmike2.itch.io/quien-es-el-mechaburro" target="_blank" data-position="top"
+                  data-tooltip="Play Here"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-external-link"></i></a>
+                <a aria-label="Visit the GitHub repo for project" href="https://github.com/ramirezmike/quien_es_el_mechaburro"
+                  target="_blank" data-position="top" data-tooltip="View Source"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-github"></i></a>
+              </div>
             </div>
+          </div>
+
+          <div class="col s12 m6 l4">
+            <div class="card medium">
+              <div class="card-image waves-effect waves-block waves-light">
+                <video autoplay="" loop="" muted="" style="height: 100%; width: 100%" class="activator" >
+                    <source src="/assets/video/go_tower_go.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="card-content">
+                <span class="card-title activator teal-text hoverline">Go Tower Go</span>
+                <p>
+                  A racing / tower defense game
+                </p>
+              </div>
+              <div class="card-action">
+                <a aria-label="Play" href="https://ramirezmike2.itch.io/go-tower-go" target="_blank" data-position="top"
+                  data-tooltip="Play Here"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-external-link"></i></a>
+                <a aria-label="Visit the GitHub repo for project" href="https://github.com/ramirezmike/go_tower_go/"
+                  target="_blank" data-position="top" data-tooltip="View Source"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-github"></i></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- VQA -->
+          <div class="col s12 m6 l4">
+            <div class="card medium">
+              <div class="card-image waves-effect waves-block waves-light">
+                <video autoplay="" loop="" muted="" style="height: 100%; width: 100%" class="activator" >
+                    <source src="/assets/video/usa_fl.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="card-content">
+                <span class="card-title activator teal-text hoverline">USA FL SC XLV</span>
+                <p>
+                  A football action game with a combine on the field
+                </p>
+              </div>
+              <div class="card-action">
+                <a aria-label="Play" href="https://ramirezmike2.itch.io/usa-football-league-scouting-combine-xlv" target="_blank" data-position="top"
+                  data-tooltip="Play Here"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-external-link"></i></a>
+                <a aria-label="Visit the GitHub repo for project" href="https://github.com/ramirezmike/USA-Football-League-Scouting-Combine-XLV"
+                  target="_blank" data-position="top" data-tooltip="View Source"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-github"></i></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Video Summarizer -->
+          <div class="col s12 m6 l4">
+            <div class="card medium">
+              <div class="card-image waves-effect waves-block waves-light">
+                <video autoplay="" loop="" muted="" style="height: 100%; width: 100%" class="activator" >
+                    <source src="/assets/video/bull.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="card-content">
+                <span class="card-title activator teal-text hoverline">Adore's Antiques</span>
+                <p>
+                  A game where you guide your bull to destroy antique stores
+                </p>
+              </div>
+              <div class="card-action">
+                <a aria-label="Play" href="https://ramirezmike2.itch.io/adores-antiques" target="_blank" data-position="top"
+                  data-tooltip="Play Here"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-external-link"></i></a>
+                <a aria-label="Visit the GitHub repo for project" href="https://github.com/ramirezmike/game_off_2022"
+                  target="_blank" data-position="top" data-tooltip="View Source"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-github"></i></a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image Generator -->
+          <div class="col s12 m6 l4">
+            <div class="card medium">
+              <div class="card-image waves-effect waves-block waves-light">
+                <video autoplay="" loop="" muted="" style="height: 100%; width: 100%" class="activator" >
+                    <source src="/assets/video/walk.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="card-content">
+                <span class="card-title activator teal-text hoverline">A Walk Around The Block</span>
+                <p>
+                  A game where you walk your pets and also collect pets
+                </p>
+              </div>
+              <div class="card-action">
+                <a aria-label="Play" href="https://ramirezmike2.itch.io/a-walk-around-the-block" target="_blank" data-position="top"
+                  data-tooltip="Play Here"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-external-link"></i></a>
+                <a aria-label="Visit the GitHub repo for project" href="https://github.com/ramirezmike/a_walk_around_the_block"
+                  target="_blank" data-position="top" data-tooltip="View Source"
+                  class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+                    class="fa fa-github"></i></a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col s12 m6 l4">
+            <div class="card medium">
+              <div class="card-image waves-effect waves-block waves-light">
+                <video autoplay="" loop="" muted="" style="height: 100%; width: 100%" class="activator" >
+                    <source src="/assets/video/exit3a.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="card-content">
+                <span class="card-title activator teal-text hoverline">Exit 3A to NODA</span>
+                <p>
+                <b>Work in Progress</b> A game about taking the most infamous exit in Charlotte
+                </p>
+              </div>
+              <div class="card-action">
+              </div>
+            </div>
+          </div>
+
+          <div class="col s12 m6 l4">
+            <div class="card medium">
+              <div class="card-image waves-effect waves-block waves-light">
+                <video autoplay="" loop="" muted="" style="height: 100%; width: 100%" class="activator" >
+                    <source src="/assets/video/bugs.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="card-content">
+                <span class="card-title activator teal-text hoverline">Doing Chores and Killing Bugs</span>
+                <p>
+                <b>Work in Progress</b> A game based on my life of doing chores and killing bugs in my home
+                </p>
+              </div>
+              <div class="card-action">
+              </div>
+            </div>
+          </div>
+
+          <!-- ************* -->
         </div>
-        <div hr=""></div>
-    </body>
+      </div>
+    </section>
+
+    <!-- Eight Section: Contact -->
+    <section id="contact" class="section scrollspy full-height">
+      <h3 class="page-title white-text teal">Contact</h3>
+      <div class="container">
+        <p>
+          <a aria-label="Email Michael" href="mailto:ramirezmike2@gmail.com" target="_blank" data-position="top"
+            data-tooltip="Email Michael" class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+              class="fa fa-envelope"></i><a aria-label="Email Michael" href="mailto:ramirezmike2@gmail.com"
+              class="hoverline">ramirezmike2@gmail.com</a></a>
+        </p>
+        <p>
+          <a aria-label="View Michael on GitHub" href="https://github.com/ramirezmike/" target="_blank"
+            data-position="top" data-tooltip="View Michael on GitHub"
+            class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i class="fa-brands fa-github"></i><a
+              aria-label="Varad on Github" href="https://github.com/ramirezmike/" class="hoverline"
+              target="_blank">github.com/ramirezmike</a></a>
+        </p>
+        <p>
+          <a aria-label="View Michael on LinkedIn" href="http://linkedin.com/in/michael-ramirez-b1a98649" target="_blank"
+            data-position="top" data-tooltip="View Michael on LinkedIn"
+            class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+              class="fa-brands fa-linkedin"></i><a aria-label="Michael on LinkedIn" href="http://linkedin.com/in/michael-ramirez-b1a98649"
+              class="hoverline" target="_blank">linkedin.com/in/michael-ramirez-b1a98649</a></a>
+        </p>
+        <p>
+          <a aria-label="View Michael on TikTok" href="https://www.tiktok.com/@mmmmramirez" target="_blank"
+            data-position="top" data-tooltip="View Michael on TikTok"
+            class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+              class="fa-brands fa-tiktok"></i><a aria-label="Michael on TikTok" href="https://www.tiktok.com/@mmmmramirez"
+              class="hoverline" target="_blank">tiktok.com/@mmmmramirez</a></a>
+        </p>
+        <p>
+          <a aria-label="View Michael on Mastodon" href="https://mastodon.social/@ramirezmike" target="_blank"
+            data-position="top" data-tooltip="View Michael on Mastodon"
+            class="btn-floating btn-large waves-effect waves-light blue-grey tooltipped"><i
+              class="fa-brands fa-mastodon"></i><a aria-label="Michael on Mastodon" href="https://mastodon.social/@ramirezmike"
+              class="hoverline" target="_blank">mastodon.social/@ramirezmike</a></a>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- typed.js -->
+  <script src="assets/vendor/typed.js/typed.min.js"></script>
+  <script type="text/javascript">
+    var typed = new Typed('.typing',{
+      strings: ["Game Programmer", "Music Composer", "Game Designer", "3D Modeler", "3D Animator"],
+      loop: true,
+      typeSpeed: 80,
+      backSpeed: 40
+    });
+  </script>
+
+
+  <!-- jQuery-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
+  <!-- Materialize - Compiled and minified JavaScript-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.95.3/js/materialize.min.js"></script>
+  <script>
+    // Materialize - Initializers
+    $(document).ready(function () {
+      $(".scrollspy").scrollSpy()
+      // Initialize collapse button
+      $(".button-collapse").sideNav({
+        menuWidth: 190, // Default is 240
+        edge: "left", // Choose the horizontal origin
+        closeOnClick: true // Closes side-nav on <a> clicks, useful for Angular/Meteor
+      })
+    })
+  </script>
+</body>
+
 </html>
